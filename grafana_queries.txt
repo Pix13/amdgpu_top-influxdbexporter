@@ -1,0 +1,32 @@
+# Grafana Flux Queries for amdgpu_exporter
+
+## 1. GPU Clock Speed (SCLK & MCLK)
+# Measurement: clock | Fields: gfx_sclk, gfx_mclk
+from(bucket: "gpubucket")
+  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+  |> filter(fn: (r) => r["_measurement"] == "clock")
+  |> filter(fn: (r) => r["_field"] == "gfx_sclk" or r["_field"] == "gfx_mclk")
+  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)
+  |> yield(name: "mean")
+
+---
+
+## 2. GPU Temperature
+# Measurement: temperature | Field: edge
+from(bucket: "gpubucket")
+  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+  |> filter(fn: (r) => r["_measurement"] == "temperature")
+  |> filter(fn: (r) => r["_field"] == "edge")
+  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)
+  |> yield(name: "mean")
+
+---
+
+## 3. GPU Power Consumption (Wattage)
+# Measurement: power | Field: avg_power
+from(bucket: "gpubucket")
+  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+  |> filter(fn: (r) => r["_measurement"] == "power")
+  |> filter(fn: (r) => r["_field"] == "avg_power")
+  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)
+  |> yield(name: "mean")
